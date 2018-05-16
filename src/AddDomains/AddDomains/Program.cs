@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AddDomains
@@ -74,14 +75,42 @@ namespace AddDomains
                     .Replace('|', ' ')
                     .Replace('^', ' ')
                     .Replace('\t', ' ')
-                    .Replace("127.0.0.1", "")
-                    .Replace("0.0.0.0", "")
-                    .Replace("::1", "")
                     .Trim();
                     ;
-                if (!string.IsNullOrEmpty(str)
-                    &&str!="localhost") {
-                    list.Add(str);
+                str =Regex.Replace(str, @"\s+", " ");
+
+                var aa = str.Split(' ');
+
+                string domain = null;
+
+                if (aa.Length == 1)
+                {
+                    domain = str;
+                }
+                else if (aa.Length == 2)
+                {
+                    domain = aa[1];
+                }
+                else if (aa.Length == 0) { }
+                else {
+                    Console.WriteLine($"Error in domain str: {str}");
+                }
+
+
+                if (domain!=null&& domain.Length>0
+                    && domain != "localhost"
+                    && domain != "localhost.localdomain"
+                    && domain != "broadcasthost"
+                    && domain != "local"
+                    && domain != "ip6-localnet"
+                    && domain != "ip6-mcastprefix"
+                    && domain != "ip6-allnodes"
+                    && domain != "ip6-allrouters"
+                    && domain != "ip6-allhosts"
+                    )
+                {
+                    list.Add(domain);
+
                 }
             }
             return list;
