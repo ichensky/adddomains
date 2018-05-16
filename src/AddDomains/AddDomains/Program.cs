@@ -45,7 +45,7 @@ namespace AddDomains
                     var client = new HttpClient();
                     var domainsStr = await client.GetStringAsync(url);
                     var domainsArr = domainsStr.Split(new[] { '\r', '\n' });
-                    var xDomains = Domains(domainsArr);
+                    var xDomains = await Domains(domainsArr);
                     domains.AddRange(xDomains);
                 }
                 catch (Exception ex)
@@ -60,60 +60,112 @@ namespace AddDomains
             return domains;
         }
 
-        public static List<string> Domains(IEnumerable<string> domains)
+        public static Task<List<string>> Domains(IEnumerable<string> domains)
         {
-            var list = new List<string>();
-            foreach (var item in domains)
+            return Task.Factory.StartNew(() =>
             {
-                var str = item;
-                var index = str.IndexOf("#");
-                if (index>-1)
+                var list = new List<string>();
+                foreach (var item in domains)
                 {
-                    str = item.Remove(index);
-                }
-                str = str
-                    .Replace('|', ' ')
-                    .Replace('^', ' ')
-                    .Replace('\t', ' ')
-                    .Trim();
+                    var str = item;
+                    var index = str.IndexOf("#");
+                    if (index > -1)
+                    {
+                        str = str.Remove(index);
+                    }
+                    index = str.IndexOf(";");
+                    if (index > -1)
+                    {
+                        str = str.Remove(index);
+                    }
+                    index = str.IndexOf(",");
+                    if (index > -1)
+                    {
+                        str = str.Remove(index);
+                    }
+                    
+
+                  
+                    str = str
+                        .Replace('|', ' ')
+                        .Replace('^', ' ')
+                        .Replace('\t', ' ')
+                        .Trim();
                     ;
-                str =Regex.Replace(str, @"\s+", " ");
+                    index = str.LastIndexOf(".jpg");
+                    if (index > -1)
+                    {
+                        str = str.Remove(index);
+                    }
+                    index = str.LastIndexOf(".gif");
+                    if (index > -1)
+                    {
+                        str = str.Remove(index);
+                    }
+                    index = str.LastIndexOf(".png");
+                    if (index > -1)
+                    {
+                        str = str.Remove(index);
+                    }
+                      index = str.IndexOf("www.");
+                    if (index == 0)
+                    {
+                        str = str.Remove(0, 4);
+                    }
 
-                var aa = str.Split(' ');
+                    str = Regex.Replace(str, @"\s+", " ");
 
-                string domain = null;
 
-                if (aa.Length == 1)
-                {
-                    domain = str;
+
+
+
+
+                    var aa = str.Split(' ');
+
+                    string domain = null;
+
+                    if (aa.Length == 1)
+                    {
+                        domain = str;
+                    }
+                    else if (aa.Length == 2)
+                    {
+                        domain = aa[1];
+                    }
+                    else if (aa.Length == 0) { }
+                    else
+                    {
+                        Console.WriteLine($"Error in domain str: {str}");
+                    }
+
+
+                    if (domain != null && domain.Length > 0
+                        && domain != "localhost"
+                        && domain != "localhost.localdomain"
+                        && domain != "broadcasthost"
+                        && domain != "local"
+                        && domain != "ip6-localnet"
+                        && domain != "ip6-mcastprefix"
+                        && domain != "ip6-allnodes"
+                        && domain != "ip6-allrouters"
+                        && domain != "ip6-allhosts"
+                        && domain != "0.0.0.0"
+                        && domain != "127.0.0.1"
+                        && Regex.Match(domain[0].ToString(), "[a-zA-Z0-9]").Success
+
+
+
+
+                        )
+                    {
+                        list.Add(domain);
+
+                    }
                 }
-                else if (aa.Length == 2)
-                {
-                    domain = aa[1];
-                }
-                else if (aa.Length == 0) { }
-                else {
-                    Console.WriteLine($"Error in domain str: {str}");
-                }
+                return list;
 
-
-                if (domain!=null&& domain.Length>0
-                    && domain != "localhost"
-                    && domain != "localhost.localdomain"
-                    && domain != "broadcasthost"
-                    && domain != "local"
-                    && domain != "ip6-localnet"
-                    && domain != "ip6-mcastprefix"
-                    && domain != "ip6-allnodes"
-                    && domain != "ip6-allrouters"
-                    && domain != "ip6-allhosts"
-                    )
-                {
-                    list.Add(domain);
-
-                }
-            }
-            return list;
+            });
+            
         }
     }
 }
