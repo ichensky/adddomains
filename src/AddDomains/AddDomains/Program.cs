@@ -42,7 +42,9 @@ namespace AddDomains
                 try
                 {
                     Console.WriteLine($"Getting domain names from url: {url}");
-                    var client = new HttpClient();
+                    var client = new HttpClient() {
+
+                    };
                     var domainsStr = await client.GetStringAsync(url);
                     var domainsArr = domainsStr.Split(new[] { '\r', '\n' });
                     var xDomains = await Domains(domainsArr);
@@ -92,33 +94,7 @@ namespace AddDomains
                         .Replace('\t', ' ')
                         .Trim();
                     ;
-                    index = str.LastIndexOf(".jpg");
-                    if (index > -1)
-                    {
-                        str = str.Remove(index);
-                    }
-                    index = str.LastIndexOf(".gif");
-                    if (index > -1)
-                    {
-                        str = str.Remove(index);
-                    }
-                    index = str.LastIndexOf(".png");
-                    if (index > -1)
-                    {
-                        str = str.Remove(index);
-                    }
-                      index = str.IndexOf("www.");
-                    if (index == 0)
-                    {
-                        str = str.Remove(0, 4);
-                    }
-
                     str = Regex.Replace(str, @"\s+", " ");
-
-
-
-
-
 
                     var aa = str.Split(' ');
 
@@ -132,11 +108,35 @@ namespace AddDomains
                     {
                         domain = aa[1];
                     }
-                    else if (aa.Length == 0) { }
+                    else if (aa.Length == 0) {
+                    }
                     else
                     {
-                        Console.WriteLine($"Error in domain str: {str}");
+                        //Console.WriteLine($"Error in domain str: {str}");
                     }
+                    if (domain==null||domain.Length==0)
+                    {
+                        continue;
+                    }
+
+                        index = domain.IndexOf("www.");
+                        if (index == 0)
+                        {
+                            domain = domain.Remove(0, 4);
+                        }
+
+                    index = domain.IndexOf("http://");
+                    if (index == 0)
+                    {
+                        domain = domain.Remove(0, 7);
+                    }
+                    index = domain.IndexOf("https://");
+                    if (index == 0)
+                    {
+                        domain = domain.Remove(0, 8);
+                    }
+
+
 
 
                     if (domain != null && domain.Length > 0
@@ -153,7 +153,9 @@ namespace AddDomains
                         && domain != "127.0.0.1"
                         && Regex.Match(domain[0].ToString(), "[a-zA-Z0-9]").Success
 
-
+                        &&domain.LastIndexOf(".jpg")!=domain.Length-4
+                        &&domain.LastIndexOf(".gif")!=domain.Length-4
+                        &&domain.LastIndexOf(".png")!=domain.Length-4
 
 
                         )
